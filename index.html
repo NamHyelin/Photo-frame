@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f8f3f0">
+<title>Four-Frame Studio</title>
+<style>
+:root{--ink:#292321;--muted:#80736f;--paper:#fffdfa;--rose:#e8a7a0;--rose-dark:#b96868;--line:#e9deda;--green:#557b68}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#f7f1ee;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{padding:18px 18px 12px;max-width:900px;margin:auto}h1{font-size:24px;letter-spacing:-.04em;margin:0 0 5px}.sub{color:var(--muted);font-size:13px}
+main{max-width:900px;margin:auto;padding:0 14px 30px}.steps{display:flex;gap:7px;margin:8px 0 16px}.step-pill{flex:1;border:1px solid var(--line);background:#fffaf8;color:#9a8d88;border-radius:999px;padding:10px 6px;text-align:center;font-size:12px;font-weight:700}.step-pill.active{background:#302927;color:white;border-color:#302927}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 5px 20px #553a3010}.screen{display:none}.screen.active{display:block}.section-head{display:flex;align-items:start;justify-content:space-between;gap:10px;margin-bottom:12px}.section-head h2{font-size:20px;margin:0 0 4px;letter-spacing:-.03em}.hint{font-size:13px;line-height:1.45;color:var(--muted);margin:0}
+button,.file-button{border:0;border-radius:13px;padding:13px 16px;font-size:14px;font-weight:750;cursor:pointer;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px}.primary{background:var(--ink);color:white}.secondary{background:#f2e7e3;color:var(--ink)}.outline{background:white;border:1px solid var(--line);color:var(--ink)}.danger{background:#fff0ee;color:#9b4545}.button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.button-row button{flex:1}.file-button input{display:none}.status{font-size:13px;color:var(--muted);margin-top:10px;min-height:18px}
+.crop-wrap{background:#eee5e0;border-radius:14px;overflow:hidden;display:flex;justify-content:center;align-items:center;min-height:190px;position:relative}.crop-canvas{display:block;max-width:100%;max-height:52vh;width:auto;height:auto;touch-action:none}
+.camera-wrap{position:relative;width:min(100%,460px);aspect-ratio:3/4;margin:0 auto;background:#201b1a;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center}.camera-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.camera-wrap .placeholder{color:#fff8;text-align:center;padding:20px;font-size:14px}.camera-wrap .flash{position:absolute;inset:0;pointer-events:none;opacity:0;border:7px solid white;box-shadow:inset 0 0 0 3px #ffffffb0;transition:opacity .12s}.camera-wrap .flash.on{opacity:1}.camera-wrap .countdown{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:white;font-size:clamp(60px,18vw,100px);font-weight:900;text-shadow:0 3px 25px #0008;background:#0002}.camera-wrap .countdown.show{display:flex}
+.captured-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px}.thumb{aspect-ratio:3/4;border:2px solid transparent;border-radius:10px;overflow:hidden;background:#eee;position:relative}.thumb img{width:100%;height:100%;object-fit:cover}.thumb.filled{border-color:#c98c84}.thumb span{position:absolute;left:5px;top:5px;color:white;background:#0008;border-radius:20px;padding:2px 6px;font-size:10px}
+.editor-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}.preview-shell{display:flex;justify-content:center;align-items:flex-start;background:#f1e7e2;border-radius:15px;padding:12px;min-height:240px}.preview{position:relative;width:min(100%,520px);aspect-ratio:9/16;background:white;overflow:hidden;box-shadow:0 3px 15px #392a2515;touch-action:none}.photo-grid{position:absolute;left:7%;top:6%;width:86%;height:59%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2.1%;z-index:3}.photo-cell{min-width:0;min-height:0;overflow:hidden;background:#eee}.photo-cell img{width:100%;height:100%;object-fit:cover;display:block}.frame-overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:2;pointer-events:none}.sticker-layer{position:absolute;inset:0;z-index:4;overflow:hidden;touch-action:none;pointer-events:none}.sticker{position:absolute;width:22%;left:50%;top:70%;transform:translate(-50%,-50%);touch-action:none;user-select:none;-webkit-user-drag:none;cursor:move;transform-origin:center center;pointer-events:auto}.sticker.selected{outline:1.5px dashed #c05d76;outline-offset:3px}.sticker img{display:block;width:100%;height:auto;pointer-events:none;user-select:none;-webkit-user-drag:none}.sticker-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.sticker-tools button,.sticker-tools label{flex:1}.tiny{font-size:11px;color:var(--muted);line-height:1.4;margin-top:8px}.hidden{display:none!important}
+@media(min-width:720px){.editor-layout{grid-template-columns:minmax(0,1.65fr) minmax(220px,1fr);align-items:start}.preview-shell{padding:12px}.preview{width:min(100%,520px)}}
+@media(max-width:390px){header{padding-left:14px;padding-right:14px}h1{font-size:22px}.panel{padding:12px}.button-row button{padding:12px 10px}.step-pill{font-size:11px}}
+.asset-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin:12px 0}.asset-choice{padding:5px;border:2px solid var(--line);border-radius:12px;background:white;min-height:95px;display:flex;flex-direction:column;gap:5px;overflow:hidden}.asset-choice img{width:100%;height:105px;object-fit:contain;background:#f5efeb;border-radius:7px}.asset-choice span{font-size:10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-choice.chosen{border-color:var(--rose-dark);background:#fff0ef}.gallery-status{font-size:12px;color:var(--muted);margin:8px 0}
+/* Sticker picker: three compact columns, with scrolling confined to this gallery. */
+#stickersGallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-height:clamp(220px,42vh,420px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;align-content:start;padding:4px;margin:10px 0 12px;border:1px solid var(--line);border-radius:12px;background:#fffaf8}
+#stickersGallery .asset-choice{min-width:0;min-height:0;padding:4px;gap:3px;border-radius:9px}
+#stickersGallery .asset-choice img{height:clamp(62px,9vw,88px);background:#f5efeb}
+#stickersGallery .asset-choice span{font-size:9px}
+</style>
+</head>
+<body>
+<header><h1>Four-Frame Studio</h1><div class="sub">Your photos, your frame, your moment.</div></header>
+<main>
+  <div class="steps" aria-label="Progress">
+    <div class="step-pill active" id="pill1">1 · Choose Frame</div><div class="step-pill" id="pill2">2 · Take Photos</div><div class="step-pill" id="pill3">3 · Decorate</div>
+  </div>
+  <section class="screen active" id="screen1">
+    <div class="panel">
+      <div class="section-head"><div><h2>Step 1 — Choose Your Frame</h2><p class="hint">Choose a frame image from your photo library. Move or resize the fixed 9:16 crop box, then confirm your frame.</p></div></div>
+      <div class="gallery-status" id="framesGalleryStatus">Loading frames from GitHub…</div><div class="asset-gallery" id="framesGallery"></div><button class="secondary" id="refreshFrames" type="button">↻ Refresh Frames</button><details style="margin-top:10px"><summary class="tiny">Choose a frame from device instead</summary><label class="file-button secondary"><span>Choose Frame Image</span><input id="frameInput" type="file" accept="image/*"></label></details>
+      <div class="crop-wrap" id="cropWrap" style="margin-top:14px"><div class="hint" id="cropPlaceholder">Your selected frame will appear here.</div><canvas id="cropCanvas" class="crop-canvas hidden"></canvas></div>
+      <div class="tiny">The crop box always stays at 9:16. Drag inside it to move; drag a corner handle to resize. The cropped image becomes your final frame.</div>
+      <div class="button-row"><button class="secondary" id="resetCrop" disabled>Reset Crop</button><button class="primary" id="confirmFrame" disabled>Use This Frame →</button></div>
+      <div class="status" id="frameStatus" role="status"></div>
+    </div>
+  </section>
+  <section class="screen" id="screen2">
+    <div class="panel">
+      <div class="section-head"><div><h2>Step 2 — Take Your Photos</h2><p class="hint">The front camera will take four photos automatically. Get ready when the countdown appears.</p></div></div>
+      <div class="camera-wrap" id="cameraWrap"><video id="video" autoplay playsinline muted></video><div class="placeholder" id="cameraPlaceholder">Camera preview will appear here.<br>Allow camera access when prompted.</div><div class="countdown" id="countdown"></div><div class="flash" id="flash"></div></div>
+      <div class="captured-grid" id="capturedGrid">
+        <div class="thumb"><span>PHOTO 1</span></div><div class="thumb"><span>PHOTO 2</span></div><div class="thumb"><span>PHOTO 3</span></div><div class="thumb"><span>PHOTO 4</span></div>
+      </div>
+      <div class="button-row"><button class="secondary" id="cameraStart">Start Camera</button><button class="primary" id="autoCapture">Start Auto Capture</button></div>
+      <div class="button-row"><button class="outline" id="again">Again</button><button class="primary" id="nextToEdit" disabled>Next →</button></div>
+      <div class="status" id="cameraStatus" role="status">Allow camera access, then tap Start Auto Capture.</div>
+    </div>
+  </section>
+  <section class="screen" id="screen3">
+    <div class="panel">
+      <div class="section-head"><div><h2>Step 3 — Decorate & Export</h2><p class="hint">Your four photos are arranged in a 2 × 2 layout. Add stickers and use one finger to move them, or two fingers to resize and rotate.</p></div></div>
+      <div class="editor-layout">
+        <div>
+          <div class="preview-shell"><div class="preview" id="preview">
+            <div class="photo-grid" id="photoGrid"><div class="photo-cell"></div><div class="photo-cell"></div><div class="photo-cell"></div><div class="photo-cell"></div></div>
+            <img id="frameOverlay" class="frame-overlay" alt="">
+            <div class="sticker-layer" id="stickerLayer"></div>
+          </div></div>
+          <div class="tiny">Photo placement: upper 59% of the frame, with a small gap between images. The lower area is left open for frame artwork or text.</div>
+        </div>
+        <div>
+          <h3 style="margin:0">Stickers</h3><div class="gallery-status" id="stickersGalleryStatus">Loading stickers from GitHub…</div><div class="asset-gallery" id="stickersGallery"></div><button class="secondary" id="refreshStickers" type="button">↻ Refresh Stickers</button><details style="margin-top:10px"><summary class="tiny">Add stickers from device instead</summary><label class="file-button secondary"><span>＋ Add Sticker from Photos</span><input id="stickerInput" type="file" accept="image/*" multiple></label></details>
+          <div class="sticker-tools"><button class="secondary" id="bringFront">Bring to Front</button><button class="danger" id="deleteSticker">Delete Sticker</button></div>
+          <div class="tiny">Tip: transparent PNG stickers work best. Tap a sticker to select it. Drag to move; pinch to resize; twist to rotate. Use Delete Sticker to remove the selected item.</div>
+          <div class="button-row"><button class="outline" id="backToCamera">↻ Restart</button></div>
+          <div class="button-row"><button class="primary" id="saveImage">Save &amp; Share</button></div>
+          <div class="status" id="exportStatus" role="status">Save or AirDrop opens the iPad share sheet when supported.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const screens = [ $('screen1'), $('screen2'), $('screen3') ];
+// Public GitHub repository: no authentication token is needed.
+const REPO='NamHyelin/Photo-frame';
+const galleryCache={};
+async function fetchAssets(folder,force=false){
+ if(galleryCache[folder]&&!force)return galleryCache[folder];
+ const url=`https://api.github.com/repos/${REPO}/contents/${encodeURIComponent(folder)}?ref=main`;
+ const response=await fetch(url,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
+ if(!response.ok)throw Error(response.status===404?`The ${folder} folder was not found or the repository is private.`:`GitHub returned HTTP ${response.status}.`);
+ const items=await response.json();
+ if(!Array.isArray(items))throw Error('Unexpected GitHub response.');
+ return galleryCache[folder]=items.filter(item=>item.type==='file'&&/\.(png|jpe?g|webp|gif)$/i.test(item.name)).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+}
+// Download as a same-origin blob URL to avoid tainted canvas when exporting.
+async function assetBlobURL(item){
+ const url=`https://raw.githubusercontent.com/${REPO}/main/${item.path.split('/').map(encodeURIComponent).join('/')}`;
+ const response=await fetch(url,{cache:'force-cache'});
+ if(!response.ok)throw Error(`Could not download ${item.name}`);
+ return URL.createObjectURL(await response.blob());
+}
+let activeFrameAssetURL=null;
+async function renderGallery(folder,force=false){
+ const isFrame=folder==='Frames',grid=$(isFrame?'framesGallery':'stickersGallery'),status=$(isFrame?'framesGalleryStatus':'stickersGalleryStatus');
+ status.textContent=`Loading ${folder}…`;
+ try{
+  const items=await fetchAssets(folder,force);grid.replaceChildren();
+  status.textContent=items.length?`${items.length} ${folder.toLowerCase()} available. Tap to ${isFrame?'choose':'add'}.`:`No images in ${folder}. Upload PNG/JPG/WebP files to GitHub.`;
+  for(const item of items){
+   const btn=document.createElement('button');btn.type='button';btn.className='asset-choice';
+   const im=document.createElement('img');im.loading='lazy';im.alt=item.name;
+   im.src=`https://raw.githubusercontent.com/${REPO}/main/${item.path.split('/').map(encodeURIComponent).join('/')}`;
+   const label=document.createElement('span');label.textContent=item.name;btn.append(im,label);
+   btn.addEventListener('click',async()=>{
+    if(btn.disabled)return;btn.disabled=true;status.textContent=`Opening ${item.name}…`;
+    try{
+     const blobURL=await assetBlobURL(item);
+     if(isFrame){
+      const loaded=await loadImage(blobURL);
+      if(activeFrameAssetURL)URL.revokeObjectURL(activeFrameAssetURL);
+      activeFrameAssetURL=blobURL;frameImage=loaded;originalFrame=null;
+      $('cropPlaceholder').classList.add('hidden');cropCanvas.classList.remove('hidden');
+      $('resetCrop').disabled=false;$('confirmFrame').disabled=false;initCrop();
+      grid.querySelectorAll('.asset-choice').forEach(el=>el.classList.remove('chosen'));btn.classList.add('chosen');
+      status.textContent=`Selected ${item.name}. Adjust the crop, then continue.`;
+     }else{
+      await loadImage(blobURL);makeSticker(blobURL);status.textContent=`Added ${item.name}. Tap another sticker to add it.`;
+     }
+    }catch(err){status.textContent=`Unable to open image: ${err.message}`;}
+    finally{btn.disabled=false;}
+   });grid.appendChild(btn);
+  }
+ }catch(err){status.textContent=`Could not load ${folder}: ${err.message} Try Refresh or use device photos.`;}
+}
+$('refreshFrames').addEventListener('click',()=>renderGallery('Frames',true));
+$('refreshStickers').addEventListener('click',()=>renderGallery('Stickers',true));
+renderGallery('Frames');renderGallery('Stickers');
+
+function go(n){ screens.forEach((s,i)=>s.classList.toggle('active',i===n-1)); [1,2,3].forEach(i=>$('pill'+i).classList.toggle('active',i===n)); window.scrollTo({top:0,behavior:'smooth'}); }
+let originalFrame=null, croppedFrame=null, cropRect=null, frameImage=null;
+const cropCanvas=$('cropCanvas'), cropCtx=cropCanvas.getContext('2d');
+function drawCrop(){
+ if(!frameImage||!cropRect)return;
+ cropCanvas.width=frameImage.naturalWidth; cropCanvas.height=frameImage.naturalHeight;
+ cropCtx.clearRect(0,0,cropCanvas.width,cropCanvas.height); cropCtx.drawImage(frameImage,0,0);
+ const r=cropRect; cropCtx.save(); cropCtx.fillStyle='rgba(20,12,10,.52)'; cropCtx.fillRect(0,0,cropCanvas.width,cropCanvas.height); cropCtx.clearRect(r.x,r.y,r.w,r.h); cropCtx.drawImage(frameImage,r.x,r.y,r.w,r.h,r.x,r.y,r.w,r.h);
+ cropCtx.strokeStyle='#fff'; cropCtx.lineWidth=Math.max(3,frameImage.naturalWidth/450); cropCtx.setLineDash([]); cropCtx.strokeRect(r.x,r.y,r.w,r.h);
+ cropCtx.strokeStyle='#e8a7a0'; cropCtx.lineWidth=Math.max(5,frameImage.naturalWidth/300); const hs=Math.max(18,frameImage.naturalWidth/22); [[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]].forEach(([x,y])=>{cropCtx.fillStyle='#fff';cropCtx.fillRect(x-hs/2,y-hs/2,hs,hs);cropCtx.strokeRect(x-hs/2,y-hs/2,hs,hs)});cropCtx.restore();
+}
+function initCrop(){
+ const iw=frameImage.naturalWidth, ih=frameImage.naturalHeight, w=Math.min(iw,ih*9/16)*.78, h=w*16/9;
+ cropRect={x:(iw-w)/2,y:(ih-h)/2,w,h}; drawCrop();
+}
+$('frameInput').addEventListener('change',e=>{
+ const f=e.target.files&&e.target.files[0]; if(!f)return;
+ const url=URL.createObjectURL(f); const im=new Image();
+ im.onload=()=>{frameImage=im; originalFrame=f; $('cropPlaceholder').classList.add('hidden');cropCanvas.classList.remove('hidden');$('resetCrop').disabled=false;$('confirmFrame').disabled=false;initCrop();$('frameStatus').textContent='Adjust the crop box, then use this frame.';URL.revokeObjectURL(url)}; im.onerror=()=>{$('frameStatus').textContent='Could not load this image. Please choose another.'}; im.src=url;
+});
+$('resetCrop').addEventListener('click',()=>{if(frameImage)initCrop()});
+let cropGesture=null;
+function canvasPoint(e){const b=cropCanvas.getBoundingClientRect();return{x:(e.clientX-b.left)*cropCanvas.width/b.width,y:(e.clientY-b.top)*cropCanvas.height/b.height}}
+cropCanvas.addEventListener('pointerdown',e=>{if(!cropRect)return;e.preventDefault();cropCanvas.setPointerCapture(e.pointerId);const p=canvasPoint(e),r=cropRect,handle=Math.max(24,frameImage.naturalWidth/18);const near=(x,y)=>Math.hypot(p.x-x,p.y-y)<handle;
+const corners=[[r.x,r.y],[r.x+r.w,r.y],[r.x,r.y+r.h],[r.x+r.w,r.y+r.h]];
+let corner=corners.findIndex(([x,y])=>near(x,y));
+cropGesture={p,start:{...r},mode:corner>=0?'resize':(p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h?'move':'resize'),corner:corner>=0?corner:3};
+});
+cropCanvas.addEventListener('pointermove',e=>{if(!cropGesture||!cropRect)return;const p=canvasPoint(e),g=cropGesture,dx=p.x-g.p.x,dy=p.y-g.p.y,iw=frameImage.naturalWidth,ih=frameImage.naturalHeight;
+ if(g.mode==='move'){cropRect.x=Math.max(0,Math.min(iw-cropRect.w,g.start.x+dx));cropRect.y=Math.max(0,Math.min(ih-cropRect.h,g.start.y+dy))}
+ else {const c=g.corner,signX=(c===0||c===2)?-1:1,signY=(c===0||c===1)?-1:1;let nw=g.start.w+dx*signX,nh=nw*16/9;const maxW=Math.min(signX<0?g.start.x+g.start.w:iw-g.start.x, (signY<0?g.start.y+g.start.h:ih-g.start.y)*9/16);nw=Math.max(Math.min(iw,ih*9/16)*.18,Math.min(maxW,nw));nh=nw*16/9;cropRect.w=nw;cropRect.h=nh;cropRect.x=signX<0?g.start.x+g.start.w-nw:g.start.x;cropRect.y=signY<0?g.start.y+g.start.h-nh:g.start.y;cropRect.x=Math.max(0,Math.min(iw-nw,cropRect.x));cropRect.y=Math.max(0,Math.min(ih-nh,cropRect.y));}
+ drawCrop();
+});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>cropCanvas.addEventListener(ev,()=>cropGesture=null));
+$('confirmFrame').addEventListener('click',()=>{
+ if(!frameImage||!cropRect)return;const c=document.createElement('canvas');c.width=900;c.height=1600;c.getContext('2d').drawImage(frameImage,cropRect.x,cropRect.y,cropRect.w,cropRect.h,0,0,c.width,c.height);
+ croppedFrame=c; c.toBlob(blob=>{if(blob){frameOverlayBlob=blob;frameOverlay.src=URL.createObjectURL(blob)}});
+ $('frameStatus').textContent='Frame set! Next, take your photos.';go(2);startCamera();
+});
+let frameOverlayBlob=null, stream=null, shots=[], captureBusy=false, captureTimer=null;
+const video=$('video'), count=$('countdown'), flash=$('flash');
+async function startCamera(){
+ try{
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:2316},height:{ideal:3088},aspectRatio:{ideal:0.75}},audio:false});
+  video.srcObject=stream;await video.play();$('cameraPlaceholder').classList.add('hidden');$('cameraStatus').textContent='Camera ready. Tap Start Auto Capture when you are ready.';
+ }catch(err){$('cameraPlaceholder').classList.remove('hidden');$('cameraStatus').textContent='Camera access is unavailable. Open this page in Safari over HTTPS and allow camera access. '+(err&&err.message?err.message:'');}
+}
+$('cameraStart').addEventListener('click',startCamera);
+function renderThumbs(){const grid=$('capturedGrid');grid.innerHTML='';for(let i=0;i<4;i++){const d=document.createElement('div');d.className='thumb'+(shots[i]?' filled':'');if(shots[i]){const im=document.createElement('img');im.src=shots[i];d.appendChild(im)}const s=document.createElement('span');s.textContent='PHOTO '+(i+1);d.appendChild(s);grid.appendChild(d)}$('nextToEdit').disabled=shots.length!==4;}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function snap(){
+ const w=video.videoWidth||2316,h=video.videoHeight||3088,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.translate(w,0);x.scale(-1,1);x.drawImage(video,0,0,w,h);return new Promise(resolve=>c.toBlob(b=>resolve(b?URL.createObjectURL(b):c.toDataURL('image/jpeg',.94)),'image/jpeg',.94));
+}
+async function runCapture(){
+ if(captureBusy)return;if(!stream||video.readyState<2){await startCamera();if(!stream||video.readyState<2)return}
+ captureBusy=true;$('autoCapture').disabled=true;$('again').disabled=true;$('cameraStatus').textContent='Get ready! Four photos will be taken.';
+ shots.forEach(u=>{if(u.startsWith('blob:'))URL.revokeObjectURL(u)});shots=[];renderThumbs();
+ try{for(let i=0;i<4;i++){for(let n=3;n>=1;n--){count.textContent=String(n);count.classList.add('show');await sleep(1000)}count.classList.remove('show');flash.classList.add('on');await sleep(160);const shot=await snap();shots.push(shot);renderThumbs();await sleep(220);flash.classList.remove('on');$('cameraStatus').textContent=`Captured ${i+1} of 4 photos.`;if(i<3)await sleep(650)}$('cameraStatus').textContent='All four photos are ready. Tap Again to retake or Next to decorate.';}
+ catch(err){$('cameraStatus').textContent='Capture stopped. Check camera permission and try again.'}
+ finally{count.classList.remove('show');flash.classList.remove('on');captureBusy=false;$('autoCapture').disabled=false;$('again').disabled=false;renderThumbs()}
+}
+$('autoCapture').addEventListener('click',runCapture);$('again').addEventListener('click',runCapture);
+function drawPhotoGrid(){const cells=$('photoGrid').children;for(let i=0;i<4;i++){cells[i].innerHTML='';if(shots[i]){const im=document.createElement('img');im.src=shots[i];cells[i].appendChild(im)}}}
+$('nextToEdit').addEventListener('click',()=>{if(shots.length!==4)return;drawPhotoGrid();go(3)});
+
+let stickerId=0, stickers=[], selected=null, pointers=new Map(), gesture=null;
+const layer=$('stickerLayer'), preview=$('preview');
+function selectSticker(st){selected=st;layer.querySelectorAll('.sticker').forEach(el=>el.classList.toggle('selected',Number(el.dataset.id)===st?.id));}
+function makeSticker(src){
+ const id=++stickerId, el=document.createElement('div');el.className='sticker';el.dataset.id=id;el.style.left='50%';el.style.top='70%';el.style.width='22%';
+ const im=document.createElement('img');im.src=src;im.alt='Sticker';el.appendChild(im);layer.appendChild(el);
+ const st={id,src,el,x:.5,y:.70,w:.22,rot:0};stickers.push(st);selectSticker(st);
+ el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();selectSticker(st);el.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY,st});const ps=[...pointers.values()].filter(p=>p.st===st);if(ps.length===1){gesture={st,mode:'move',startX:st.x,startY:st.y,p0:{x:ps[0].x,y:ps[0].y}}}else if(ps.length>=2){const a=ps[ps.length-2],b=ps[ps.length-1];gesture={st,mode:'transform',startW:st.w,startRot:st.rot,startX:st.x,startY:st.y,dist:Math.hypot(a.x-b.x,a.y-b.y)||1,angle:Math.atan2(b.y-a.y,b.x-a.x),midX:(a.x+b.x)/2,midY:(a.y+b.y)/2};}});
+ return st;
+}
+function updateSticker(st){st.el.style.left=(st.x*100)+'%';st.el.style.top=(st.y*100)+'%';st.el.style.width=(st.w*100)+'%';st.el.style.transform=`translate(-50%,-50%) rotate(${st.rot}deg)`;}
+window.addEventListener('pointermove',e=>{
+ const p=pointers.get(e.pointerId);if(!p||!gesture||gesture.st!==p.st)return;e.preventDefault();p.x=e.clientX;p.y=e.clientY;const st=gesture.st,rect=layer.getBoundingClientRect();
+ const ps=[...pointers.values()].filter(q=>q.st===st);
+ if(gesture.mode==='move'&&ps.length===1){st.x=Math.max(0,Math.min(1,gesture.startX+(p.x-gesture.p0.x)/rect.width));st.y=Math.max(0,Math.min(1,gesture.startY+(p.y-gesture.p0.y)/rect.height));}
+ else if(ps.length>=2){const a=ps[ps.length-2],b=ps[ps.length-1],dist=Math.hypot(a.x-b.x,a.y-b.y)||1,angle=Math.atan2(b.y-a.y,b.x-a.x),midX=(a.x+b.x)/2,midY=(a.y+b.y)/2;if(gesture.mode!=='transform'){gesture.mode='transform';gesture.startW=st.w;gesture.startRot=st.rot;gesture.startX=st.x;gesture.startY=st.y;gesture.dist=dist;gesture.angle=angle;gesture.midX=midX;gesture.midY=midY}st.w=Math.max(.06,Math.min(.85,gesture.startW*dist/gesture.dist));st.rot=gesture.startRot+(angle-gesture.angle)*180/Math.PI;st.x=Math.max(0,Math.min(1,gesture.startX+(midX-gesture.midX)/rect.width));st.y=Math.max(0,Math.min(1,gesture.startY+(midY-gesture.midY)/rect.height));}
+ updateSticker(st);
+});
+function endPointer(e){const p=pointers.get(e.pointerId);if(!p)return;pointers.delete(e.pointerId);if(gesture&&gesture.st===p.st){const remain=[...pointers.values()].filter(q=>q.st===p.st);if(remain.length===0)gesture=null;else{const st=p.st;gesture={st,mode:'move',startX:st.x,startY:st.y,p0:{x:remain[0].x,y:remain[0].y}}}}}
+window.addEventListener('pointerup',endPointer);window.addEventListener('pointercancel',endPointer);window.addEventListener('blur',()=>{pointers.clear();gesture=null});
+layer.addEventListener('pointerdown',e=>{if(e.target===layer)selectSticker(null)});
+$('stickerInput').addEventListener('change',e=>{const files=[...e.target.files||[]];files.forEach(file=>{if(!file.type.startsWith('image/'))return;const url=URL.createObjectURL(file);const im=new Image();im.onload=()=>makeSticker(url);im.src=url});e.target.value=''});
+$('deleteSticker').addEventListener('click',()=>{if(!selected)return;selected.el.remove();stickers=stickers.filter(s=>s!==selected);selected=null});
+$('bringFront').addEventListener('click',()=>{if(!selected)return;layer.appendChild(selected.el);selectSticker(selected)});
+async function makeComposite(){
+ const out=document.createElement('canvas');out.width=1200;out.height=2133;const ctx=out.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,out.width,out.height);
+ // Match the visible editor stacking order: frame, photos, then stickers.
+ if(croppedFrame){ctx.drawImage(croppedFrame,0,0,out.width,out.height)}
+ const gridLeft=out.width*.07,gridTop=out.height*.06,gridW=out.width*.86,gridH=out.height*.59;
+ // CSS grid gap is 2.1% of the grid container's width (for both axes).
+ const gap=gridW*.021,cellW=(gridW-gap)/2,cellH=(gridH-gap)/2;
+ for(let i=0;i<4;i++){
+  if(!shots[i])continue;
+  const im=await loadImage(shots[i]);
+  const x=gridLeft+(i%2)*(cellW+gap),y=gridTop+Math.floor(i/2)*(cellH+gap);
+  drawCover(ctx,im,x,y,cellW,cellH);
+ }
+ const stage=layer.getBoundingClientRect(),scaleX=out.width/stage.width,scaleY=out.height/stage.height;
+ for(const st of stickers){const im=await loadImage(st.src);const w=st.w*stage.width*scaleX,h=w*im.naturalHeight/im.naturalWidth,x=st.x*out.width,y=st.y*out.height;ctx.save();ctx.translate(x,y);ctx.rotate(st.rot*Math.PI/180);ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore()}
+ return new Promise(resolve=>out.toBlob(b=>resolve(b),'image/png'));
+}
+function loadImage(src){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src})}
+function drawCover(ctx,img,x,y,w,h){const s=Math.max(w/img.naturalWidth,h/img.naturalHeight),sw=w/s,sh=h/s,sx=(img.naturalWidth-sw)/2,sy=(img.naturalHeight-sh)/2;ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)}
+async function exportImage(mode){
+ $('exportStatus').textContent='Preparing your finished photo…';try{const blob=await makeComposite();if(!blob)throw Error('Could not create image');const file=new File([blob],'four-frame-studio.png',{type:'image/png'});
+ if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Four-Frame Studio'});$('exportStatus').textContent='Choose Save Image or AirDrop in the share sheet.'}
+ else{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='four-frame-studio.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);$('exportStatus').textContent='Image downloaded. Open the share menu to save it or send it with AirDrop.'}
+ }catch(err){if(err&&err.name==='AbortError'){$('exportStatus').textContent='Share cancelled.'}else{$('exportStatus').textContent='Could not export the image. Please try again.'}}
+}
+$('backToCamera').addEventListener('click',()=>{
+ // Clear all data from the previous session and return to frame selection.
+ if(stream){stream.getTracks().forEach(track=>track.stop());stream=null;}
+ video.pause();video.srcObject=null;
+ shots.forEach(url=>{if(url.startsWith('blob:'))URL.revokeObjectURL(url)});
+ shots=[];renderThumbs();drawPhotoGrid();
+ stickers.forEach(st=>{if(st.src.startsWith('blob:'))URL.revokeObjectURL(st.src);st.el.remove()});
+ stickers=[];selected=null;stickerId=0;pointers.clear();gesture=null;
+ if(frameOverlay.src.startsWith('blob:'))URL.revokeObjectURL(frameOverlay.src);
+ frameOverlay.removeAttribute('src');frameOverlayBlob=null;
+ originalFrame=null;croppedFrame=null;cropRect=null;frameImage=null;cropGesture=null;
+ if(activeFrameAssetURL){URL.revokeObjectURL(activeFrameAssetURL);activeFrameAssetURL=null;}
+ $('framesGallery').querySelectorAll('.chosen').forEach(el=>el.classList.remove('chosen'));renderGallery('Frames');
+ cropCtx.clearRect(0,0,cropCanvas.width,cropCanvas.height);
+ cropCanvas.classList.add('hidden');$('cropPlaceholder').classList.remove('hidden');
+ $('frameInput').value='';$('stickerInput').value='';
+ $('resetCrop').disabled=true;$('confirmFrame').disabled=true;
+ $('frameStatus').textContent='';$('exportStatus').textContent='Save or share your finished photo.';
+ $('cameraPlaceholder').classList.remove('hidden');$('cameraStatus').textContent='Allow camera access, then tap Start Auto Capture.';
+ count.classList.remove('show');flash.classList.remove('on');
+ go(1);
+});
+$('saveImage').addEventListener('click',()=>exportImage('save'));
+})();
+</script>
+</body>
+</html>
